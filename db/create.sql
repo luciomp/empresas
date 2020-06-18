@@ -1,0 +1,66 @@
+create table empresa (
+        id serial not null primary key,
+        codigoexec text not null,
+        url text not null,
+        papel text not null,
+        nomecomercial text not null,
+        razaosocial text not null,
+		empresa text,
+		setor text not null,
+		subsetor text not null,
+		cotacao float not null,
+		dtultimacotacao date not null,
+		tipo text not null,
+		dtultimobalanco date not null,
+		valordemercado float,
+		valordefirma float,
+		nroacoes bigint not null,
+		pl float,
+		pvp float,
+		pebit float,
+		psr float,
+		pativos float,
+		pcg float,
+		pacliq float,
+		dy float,
+		evebitda float,
+		evebit float,
+		lpa float,
+		vpa float,
+		margbruta float,
+		margebit float,
+		margliq float,
+		ebitativo float,
+		roic float,
+		roe float,
+		liqcorr float,
+		divbrutapat float,
+		giroativos float,
+		cresrec float,
+		ativo bigint,
+		divbruta bigint,
+		disponibilidades bigint,
+		divliq bigint,
+		ativocirculante bigint,
+		patrimonioliq bigint,
+		receitaliq bigint,
+		ebit bigint,
+		lucroliq bigint
+)
+
+create table errors (
+        id serial not null primary key,
+        codigoexec text not null,
+        papel text not null,
+        msg text not null
+)
+
+create table provento (
+        id serial not null primary key,
+        papel biginteger REFERENCES empresa(id),
+        dtpgto date not null,
+        valor float not null,
+		tipo text not null,
+		qntacoes bigint not null
+)
+
