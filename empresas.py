@@ -19,8 +19,9 @@ def getOnline(db):
         if 'error' in d:
             db.insertError(d)            
         else:
-            db.insertEmpresa(d)
-            
+            eid = db.insertEmpresa(d)
+            for p in d['proventos']:
+                db.insertProvento(eid, p)
 
 def makeReport(db):
     logger.info('Making The Report')

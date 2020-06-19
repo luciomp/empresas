@@ -45,7 +45,12 @@ create table empresa (
 		patrimonioliq bigint,
 		receitaliq bigint,
 		ebit bigint,
-		lucroliq bigint
+		lucroliq bigint,
+        cartdecredito bigint,
+        depositos bigint,
+        liquidezcorr bigint,
+        recservicos bigint,
+        resultintfinanc bigint
 )
 
 create table errors (

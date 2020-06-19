@@ -8,7 +8,7 @@ class Postgres:
         self.conn = psycopg2.connect(connstr)
     
     def insertEmpresa(self, fii):
-        logger.info('Inserting  {0}'.format(fii['papel']))
+        logger.info('Inserting Empresa {0}'.format(fii['papel']))
         with self.conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO EMPRESA (
@@ -57,12 +57,17 @@ class Postgres:
                     patrimonioliq,
                     receitaliq,
                     ebit,
-                    lucroliq
+                    lucroliq,
+                    cartdecredito,
+                    depositos,
+                    liquidezcorr,
+                    recservicos,
+                    resultintfinanc
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 ) RETURNING id; """, (
                 fii['codigoexec'],
                 fii['url'],
@@ -109,7 +114,12 @@ class Postgres:
                 fii['patrimonioliq'],
                 fii['receitaliq'],
                 fii['ebit'],
-                fii['lucroliq']
+                fii['lucroliq'],
+                fii['cartdecredito'],
+                fii['depositos'],
+                fii['liquidezcorr'],
+                fii['recservicos'],
+                fii['resultintfinanc']
             ))
             r = cur.fetchone()[0]
             self.conn.commit()
@@ -130,20 +140,22 @@ class Postgres:
             ))
             self.conn.commit()
 
-    def insertRendimento(self, fiiid, r):
-        logger.info('Inserting Rendimento for id {0}'.format(fiiid))
+    def insertProvento(self, fiiid, r):
+        logger.info('Inserting Provento for id {0}'.format(fiiid))
         with self.conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO RENDIMENTO (
-                    fii,
-                    dtpagamento,
-                    cotacao,
-                    rendimento
-                ) VALUES (%s, %s, %s, %s);""", (
+                INSERT INTO provento (
+                    papel,
+                    dtpgto,
+                    valor,
+                    tipo,
+                    qntacoes
+                ) VALUES (%s, %s, %s, %s, %s);""", (
                 fiiid,
-                r.dtpagamento,
-                r.cotacao,
-                r.rendimento
+                r['dtpgto'],
+                r['valor'],
+                r['tipo'],
+                r['qntacoes']
             ))
             self.conn.commit()
 

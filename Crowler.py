@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.common.exceptions import NoSuchElementException
 import logging
 from datetime import datetime
 from unicodedata import normalize
@@ -7,7 +8,7 @@ from unicodedata import normalize
 logger = logging.getLogger(__name__)
 
 class Crowler:
-    def __init__(self, timeout=30):
+    def __init__(self, timeout=45):
         op = webdriver.ChromeOptions()
         op.add_argument('headless')
         op.add_argument('--no-sandbox')
@@ -27,7 +28,6 @@ class Crowler:
         logger.info('Getting Enterprises')
         try:
             self.driver.get('http://www.fundamentus.com.br/detalhes.php')
-            logger.info('Done, parsing...')
             t = self.driver.find_element_by_id('test1')
             tbody = t.find_element_by_tag_name('tbody')
             return [
@@ -50,19 +50,33 @@ class Crowler:
         if '-' == i: return None
         return float(i)
 
-    #def getLastRevenues(self):
-    #    logger.debug('getLastRevenues')
-    #    t = self.driver.find_element_by_id('last-revenues--table')
-    #    tbody = t.find_element_by_tag_name('tbody')
-    #    revenues = []
-    #    for row in tbody.find_elements_by_tag_name('tr'):
-    #        colums = [c.text for c in row.find_elements_by_tag_name('td')]
-    #        revenues.append({
-    #            'dt': datetime.strptime(colums[1], '%d/%m/%y').date(),
-    #            'quotation': self.toFloat(colums[2]),
-    #            'revenue': self.toFloat(colums[4])
-    #        })
-    #    return {'revenues': revenues}
+    def getLastRevenues(self):
+        logger.info('getLastRevenues')
+        bts = self.driver.find_elements_by_class_name('dh')
+        href = next((bt.get_attribute('href') for bt in bts if 'proventos' in bt.get_attribute('href')), None)
+        if href is None:
+            raise Exception('Button required for proventos not found')
+        logger.info('Getting Proventos from {0}'.format(href))
+        self.driver.get(href)
+        revenues = []
+        try:
+            t = self.driver.find_element_by_id('resultado')
+            tbody = t.find_element_by_tag_name('tbody')
+        except NoSuchElementException:
+            c = self.driver.find_element_by_class_name('conteudo')
+            if 'nenhum provento encontrado' in c.text.lower():
+                return revenues
+            else:
+                raise Exception('Table "resultado" required for proventos not found')
+        for row in tbody.find_elements_by_tag_name('tr'):
+            colums = [c.text for c in row.find_elements_by_tag_name('td')]
+            revenues.append({
+                'dtpgto': self.toDate(colums[0]),
+                'valor': self.toFloat(colums[1]),
+                'tipo': colums[2].replace(' ', '').lower(),
+                'qntacoes': self.toInt(colums[3])
+            })
+        return revenues
 
     def nK(self, s):
         s = s.replace(' ', '').lower()
@@ -76,7 +90,7 @@ class Crowler:
         logger.debug('clean')
         fii = {self.nK(k): v for k,v in ofii.items()}
         fii['papel'] = fii['papel'].lower()
-        logger.info(str(fii))
+        logger.debug(str(fii))
         fii['cotacao'] = self.toFloat(fii.get('cotacao'))
         fii['dtultimacotacao'] = self.toDate(fii.get('dataultcot'))
         fii['dtultimobalanco'] = self.toDate(fii.get('ultbalancoprocessado'))
@@ -114,6 +128,11 @@ class Crowler:
         fii['receitaliq'] = self.toInt(fii.get('receitaliquida'))
         fii['ebit'] = self.toInt(fii.get('ebit'))
         fii['lucroliq'] = self.toInt(fii.get('lucroliquido'))
+        fii['cartdecredito'] = self.toInt(fii.get('cart.decredito'))
+        fii['depositos'] = self.toInt(fii.get('depositos'))
+        fii['liquidezcorr'] = self.toInt(fii.get('liquidezcorr'))
+        fii['recservicos'] = self.toInt(fii.get('recservicos'))
+        fii['resultintfinanc'] = self.toInt(fii.get('resultintfinanc'))
         return fii
 
     def getDetail(self, papel):
@@ -136,6 +155,7 @@ class Crowler:
                     if k and row.get_attribute('class').find('data') != -1:
                         atts[k] = row.text
                         k = None
+            atts['proventos'] = self.getLastRevenues()
             return self.clean(atts)
         except Exception as error:
             logger.error('Error getting detail: {0}'.format(str(error)))
