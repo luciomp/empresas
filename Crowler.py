@@ -130,7 +130,7 @@ class Crowler:
         fii['lucroliq'] = self.toInt(fii.get('lucroliquido'))
         fii['cartdecredito'] = self.toInt(fii.get('cart.decredito'))
         fii['depositos'] = self.toInt(fii.get('depositos'))
-        fii['liquidezcorr'] = self.toInt(fii.get('liquidezcorr'))
+        fii['liquidezcorr'] = self.toFloat(fii.get('liquidezcorr'))
         fii['recservicos'] = self.toInt(fii.get('recservicos'))
         fii['resultintfinanc'] = self.toInt(fii.get('resultintfinanc'))
         return fii

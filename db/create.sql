@@ -51,21 +51,21 @@ create table empresa (
         liquidezcorr bigint,
         recservicos bigint,
         resultintfinanc bigint
-)
+);
 
 create table errors (
         id serial not null primary key,
         codigoexec text not null,
         papel text not null,
         msg text not null
-)
+);
 
 create table provento (
         id serial not null primary key,
-        papel biginteger REFERENCES empresa(id),
+        papel bigint REFERENCES empresa(id),
         dtpgto date not null,
         valor float not null,
 		tipo text not null,
 		qntacoes bigint not null
-)
+);
 
